@@ -1,8 +1,16 @@
 # riblt-rust-py
 Python bindings for the [Rateless IBLT Rust library](https://github.com/Intersubjective/riblt-rust).
 
+### How to build
+```sh
+python3 -m venv .env
+source .env/bin/activate
+pip install maturin
+maturin build
+```
+
 ### Example
-Python program to use the library wiht Sip hash and 64-byte symbols:
+Python program to use the library with Sip hash and 64-byte symbols:
 ```py
 import riblt_rust_py as riblt
 
