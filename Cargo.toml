@@ -1,0 +1,12 @@
+[package]
+name = "riblt_rust_py"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "riblt_rust_py"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = "0.20.0"
+riblt = { git = "https://github.com/Intersubjective/riblt-rust.git", version = "0.1.0" }
