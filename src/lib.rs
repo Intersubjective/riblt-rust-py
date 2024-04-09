@@ -23,16 +23,21 @@ struct PySymbol {
 }
 
 #[pyclass]
-struct PyCodedSymbol {
-  sym: CodedSymbol<PySymbol>,
+struct PyHashedSymbol {
+  #[pyo3(get, set)]
+  pub data : [u8; MAX_SIZE],
+  #[pyo3(get, set)]
+  pub hash : u64,
 }
 
 #[pyclass]
-struct PyHashedSymbol {
+struct PyCodedSymbol {
   #[pyo3(get, set)]
-  pub symbol : [u8; 64],
+  pub data  : [u8; MAX_SIZE],
   #[pyo3(get, set)]
-  pub hash   : u64,
+  pub hash  : u64,
+  #[pyo3(get, set)]
+  pub count : i64,
 }
 
 #[pyclass]
@@ -98,11 +103,11 @@ impl PyEncoder {
   }
 
   fn add_symbol(&mut self, bytes: &[u8]) -> PyResult<()> {
-    if bytes.len() > MAX_SIZE {
+    if bytes.len() > MAX_SIZE || bytes.len() != self.symbol_size {
       return Err(PyTypeError::new_err("invalid bytearray size"))
     }
     self.enc.add_symbol(&PySymbol {
-      bytes     : core::array::from_fn(|i| bytes[i]),
+      bytes     : core::array::from_fn(|i| if i < self.symbol_size { bytes[i] } else { 0 }),
       size      : self.symbol_size,
       hash_type : self.hash_type,
       hash_keys : self.hash_keys,
@@ -111,8 +116,11 @@ impl PyEncoder {
   }
 
   fn produce_next_coded_symbol(&mut self) -> PyResult<PyCodedSymbol> {
+    let sym = self.enc.produce_next_coded_symbol();
     Ok(PyCodedSymbol {
-      sym: self.enc.produce_next_coded_symbol(),
+      data  : sym.symbol.bytes,
+      hash  : sym.hash,
+      count : sym.count,
     })
   }
 }
@@ -125,11 +133,11 @@ impl PyDecoder {
   }
 
   fn add_symbol(&mut self, bytes: &[u8]) -> PyResult<()> {
-    if bytes.len() > MAX_SIZE {
+    if bytes.len() > MAX_SIZE || bytes.len() != self.symbol_size {
       return Err(PyTypeError::new_err("invalid byte array size"))
     }
     self.dec.add_symbol(&PySymbol {
-      bytes     : core::array::from_fn(|i| bytes[i]),
+      bytes     : core::array::from_fn(|i| if i < self.symbol_size { bytes[i] } else { 0 }),
       size      : self.symbol_size,
       hash_type : self.hash_type,
       hash_keys : self.hash_keys,
@@ -138,7 +146,16 @@ impl PyDecoder {
   }
 
   fn add_coded_symbol(&mut self, sym: &PyCodedSymbol) -> PyResult<()> {
-    self.dec.add_coded_symbol(&sym.sym);
+    self.dec.add_coded_symbol(&CodedSymbol::<PySymbol> {
+      symbol : PySymbol {
+        bytes     : sym.data,
+        size      : self.symbol_size,
+        hash_type : self.hash_type,
+        hash_keys : self.hash_keys,
+      },
+      hash  : sym.hash,
+      count : sym.count,
+    });
     Ok(())
   }
 
@@ -159,8 +176,8 @@ impl PyDecoder {
     pyv.reserve_exact(v.len());
     for i in 0..v.len() {
       pyv.push(PyHashedSymbol {
-        symbol : v[i].symbol.bytes,
-        hash   : v[i].hash,
+        data : v[i].symbol.bytes,
+        hash : v[i].hash,
       });
     }
     Ok(pyv)
@@ -172,8 +189,8 @@ impl PyDecoder {
     pyv.reserve_exact(v.len());
     for i in 0..v.len() {
       pyv.push(PyHashedSymbol {
-        symbol : v[i].symbol.bytes,
-        hash   : v[i].hash,
+        data : v[i].symbol.bytes,
+        hash : v[i].hash,
       });
     }
     Ok(pyv)
@@ -203,8 +220,8 @@ fn new_decoder_sip(size: usize, key_0: u64, key_1: u64) -> PyResult<PyDecoder> {
 #[pymodule]
 fn riblt_rust_py(_py: Python, m: &PyModule) -> PyResult<()> {
   m.add_class::<PySymbol>()?;
-  m.add_class::<PyCodedSymbol>()?;
   m.add_class::<PyHashedSymbol>()?;
+  m.add_class::<PyCodedSymbol>()?;
   m.add_class::<PyEncoder>()?;
   m.add_class::<PyDecoder>()?;
   m.add_function(wrap_pyfunction!(new_encoder_sip, m)?)?;
