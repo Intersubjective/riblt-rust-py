@@ -104,7 +104,7 @@ impl PyEncoder {
 
   fn add_symbol(&mut self, bytes: &[u8]) -> PyResult<()> {
     if bytes.len() > MAX_SIZE || bytes.len() != self.symbol_size {
-      return Err(PyTypeError::new_err("invalid bytearray size"))
+      return Err(PyTypeError::new_err("invalid byte array size"))
     }
     self.enc.add_symbol(&PySymbol {
       bytes     : core::array::from_fn(|i| if i < self.symbol_size { bytes[i] } else { 0 }),
@@ -199,6 +199,9 @@ impl PyDecoder {
 
 #[pyfunction]
 fn new_encoder_sip(size: usize, key_0: u64, key_1: u64) -> PyResult<PyEncoder> {
+  if size > MAX_SIZE {
+    return Err(PyValueError::new_err("size is too big"));
+  }
   return Ok(PyEncoder {
     enc         : Encoder::<PySymbol>::new(),
     symbol_size : size,
@@ -209,6 +212,9 @@ fn new_encoder_sip(size: usize, key_0: u64, key_1: u64) -> PyResult<PyEncoder> {
 
 #[pyfunction]
 fn new_decoder_sip(size: usize, key_0: u64, key_1: u64) -> PyResult<PyDecoder> {
+  if size > MAX_SIZE {
+    return Err(PyValueError::new_err("size is too big"));
+  }
   return Ok(PyDecoder {
     dec         : Decoder::<PySymbol>::new(),
     symbol_size : size,
