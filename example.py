@@ -2,16 +2,15 @@ import riblt_rust_py as riblt
 
 def example():
   symbol_size = 1
-  key_0       = 123
-  key_1       = 456
+  key = bytes([16, 15, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 2, 1])
 
-  enc = riblt.new_encoder_sip(symbol_size, key_0, key_1)
+  enc = riblt.new_encoder_sip(symbol_size, key)
 
   enc.add_symbol(bytes([1]))
   enc.add_symbol(bytes([2]))
   enc.add_symbol(bytes([4]))
 
-  dec = riblt.new_decoder_sip(symbol_size, key_0, key_1)
+  dec = riblt.new_decoder_sip(symbol_size, key)
 
   dec.add_symbol(bytes([1]))
   dec.add_symbol(bytes([3]))
