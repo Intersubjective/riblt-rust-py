@@ -233,7 +233,7 @@ instant!(SIZE_0,   Sym0,   Hashed0,   Coded0,   Enc0,   Dec0  );
 instant!(SIZE_MAX, SymMax, HashedMax, CodedMax, EncMax, DecMax);
 
 #[pyfunction]
-fn new_encoder_sip(py: Python, size: usize, key: [u8; 16]) -> PyResult<PyObject> {
+fn new_encoder_sip(py: Python, size: usize, key: [u8; KEY_SIZE]) -> PyResult<PyObject> {
   if size <= SIZE_0 {
     return Ok(Enc0 {
       enc         : Encoder::<Sym0>::new(),
@@ -254,7 +254,7 @@ fn new_encoder_sip(py: Python, size: usize, key: [u8; 16]) -> PyResult<PyObject>
 }
 
 #[pyfunction]
-fn new_decoder_sip(py: Python, size: usize, key: [u8; 16]) -> PyResult<PyObject> {
+fn new_decoder_sip(py: Python, size: usize, key: [u8; KEY_SIZE]) -> PyResult<PyObject> {
   if size <= SIZE_0 {
     return Ok(Dec0 {
       dec         : Decoder::<Sym0>::new(),
