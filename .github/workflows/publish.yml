@@ -16,10 +16,13 @@ jobs:
         curl -fsS https://install.python-poetry.org | python - -y
     - name: Update PATH
       if: ${{ runner.os != 'Windows' }}
-      run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+      run: |
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
     - name: Update PATH for Windows
       if: ${{ runner.os == 'Windows' }}
-      run: echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
+      shell: bash
+      run: |
+        echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
     - name: Install dependencies
       run: |
         poetry install
@@ -39,10 +42,13 @@ jobs:
         curl -fsS https://install.python-poetry.org | python - -y
     - name: Update PATH
       if: ${{ runner.os != 'Windows' }}
-      run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+      run: |
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
     - name: Update PATH for Windows
       if: ${{ runner.os == 'Windows' }}
-      run: echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
+      shell: bash
+      run: |
+        echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
     - name: Install dependencies
       run: |
         poetry install
