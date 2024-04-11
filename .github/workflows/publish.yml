@@ -17,7 +17,8 @@ jobs:
         poetry install
     - name: Build
       run: |
-        poetry run maturin build
+        poetry run maturin build --release --out dist
+        poetry run maturin sdist --out dist
     - name: Publish to PyPI
       env:
         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}

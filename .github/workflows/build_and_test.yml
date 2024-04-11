@@ -29,6 +29,7 @@ jobs:
     - name: Build
       run: |
         poetry run maturin build
+        poetry run maturin develop
     - name: Run tests
       run: |
         poetry run python example.py

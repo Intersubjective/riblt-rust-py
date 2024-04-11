@@ -6,10 +6,8 @@ Optimal symbol sizes are: 64, 1024, 4096, 16384.
 
 ### How to build
 ```sh
-python3 -m venv .env
-source .env/bin/activate
-pip install maturin
-maturin build
+poetry install
+poetry run maturin build
 ```
 
 ### Example
@@ -49,6 +47,6 @@ print("remote symbol: " + str(remote_symbols[0].data[0]))
 
 To run the example:
 ```sh
-maturin develop
-python3 example.py
+poetry run maturin develop
+poetry run python example.py
 ```
