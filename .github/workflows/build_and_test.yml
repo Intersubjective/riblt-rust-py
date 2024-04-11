@@ -9,7 +9,10 @@ on:
 
 jobs:
   build_and_test:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
     - name: Setup Poetry
@@ -26,8 +29,3 @@ jobs:
     - name: Run tests
       run: |
         poetry run python example.py
-    - name: Publish dry run
-      run: |
-        poetry run maturin build --release --out dist --interpreter 3.10 3.11
-        poetry run maturin sdist --out dist
-        poetry publish --dry-run
