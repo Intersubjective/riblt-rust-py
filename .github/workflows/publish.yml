@@ -11,6 +11,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
     - name: Setup Poetry
       run: |
         curl -fsS https://install.python-poetry.org | python - -y
@@ -37,6 +41,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
     - name: Setup Poetry
       run: |
         curl -fsS https://install.python-poetry.org | python - -y
@@ -72,6 +80,10 @@ jobs:
     - name: Check distributions
       run: |
         ls -la dist
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
     - name: Setup Poetry
       run: |
         curl -fsS https://install.python-poetry.org | python - -y
