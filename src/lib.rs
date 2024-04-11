@@ -5,8 +5,7 @@ use riblt::*;
 #[allow(deprecated)]
 use std::hash::{SipHasher, Hasher};
 
-const HASH_SIZE : usize = 8;
-const KEY_SIZE  : usize = 16;
+const KEY_SIZE : usize = 16;
 
 #[derive(Clone, Copy)]
 enum Hash {
@@ -35,7 +34,7 @@ macro_rules! instant {
       #[pyo3(get, set)]
       pub data : [u8; $max_size],
       #[pyo3(get, set)]
-      pub hash : [u8; HASH_SIZE],
+      pub hash : u64,
     }
 
     #[pyclass]
@@ -43,7 +42,7 @@ macro_rules! instant {
       #[pyo3(get, set)]
       pub data  : [u8; $max_size],
       #[pyo3(get, set)]
-      pub hash  : [u8; HASH_SIZE],
+      pub hash  : u64,
       #[pyo3(get, set)]
       pub count : i64,
     }
@@ -131,7 +130,7 @@ macro_rules! instant {
         let sym = self.enc.produce_next_coded_symbol();
         Ok($Coded {
           data  : sym.symbol.bytes,
-          hash  : sym.hash.to_le_bytes(),
+          hash  : sym.hash,
           count : sym.count,
         })
       }
@@ -165,7 +164,7 @@ macro_rules! instant {
             hash_type : self.hash_type,
             hash_key  : self.hash_key,
           },
-          hash  : u64::from_le_bytes(sym.hash),
+          hash  : sym.hash,
           count : sym.count,
         });
         Ok(())
@@ -189,7 +188,7 @@ macro_rules! instant {
         for i in 0..v.len() {
           pyv.push($Hashed {
             data : v[i].symbol.bytes,
-            hash : v[i].hash.to_le_bytes(),
+            hash : v[i].hash,
           });
         }
         Ok(pyv)
@@ -202,7 +201,7 @@ macro_rules! instant {
         for i in 0..v.len() {
           pyv.push($Hashed {
             data : v[i].symbol.bytes,
-            hash : v[i].hash.to_le_bytes(),
+            hash : v[i].hash,
           });
         }
         Ok(pyv)
@@ -227,9 +226,13 @@ macro_rules! add_types {
 }
 
 const SIZE_0   : usize = 64;
-const SIZE_MAX : usize = 4096;
+const SIZE_1   : usize = 1024;
+const SIZE_2   : usize = 4096;
+const SIZE_MAX : usize = 16384;
 
 instant!(SIZE_0,   Sym0,   Hashed0,   Coded0,   Enc0,   Dec0  );
+instant!(SIZE_1,   Sym1,   Hashed1,   Coded1,   Enc1,   Dec1  );
+instant!(SIZE_2,   Sym2,   Hashed2,   Coded2,   Enc2,   Dec2  );
 instant!(SIZE_MAX, SymMax, HashedMax, CodedMax, EncMax, DecMax);
 
 #[pyfunction]
@@ -237,6 +240,22 @@ fn new_encoder_sip(py: Python, size: usize, key: [u8; KEY_SIZE]) -> PyResult<PyO
   if size <= SIZE_0 {
     return Ok(Enc0 {
       enc         : Encoder::<Sym0>::new(),
+      symbol_size : size,
+      hash_type   : Hash::SIP,
+      hash_key    : key,
+    }.into_py(py));
+  }
+  if size <= SIZE_1 {
+    return Ok(Enc1 {
+      enc         : Encoder::<Sym1>::new(),
+      symbol_size : size,
+      hash_type   : Hash::SIP,
+      hash_key    : key,
+    }.into_py(py));
+  }
+  if size <= SIZE_2 {
+    return Ok(Enc2 {
+      enc         : Encoder::<Sym2>::new(),
       symbol_size : size,
       hash_type   : Hash::SIP,
       hash_key    : key,
@@ -263,6 +282,22 @@ fn new_decoder_sip(py: Python, size: usize, key: [u8; KEY_SIZE]) -> PyResult<PyO
       hash_key    : key,
     }.into_py(py));
   }
+  if size <= SIZE_1 {
+    return Ok(Dec1 {
+      dec         : Decoder::<Sym1>::new(),
+      symbol_size : size,
+      hash_type   : Hash::SIP,
+      hash_key    : key,
+    }.into_py(py));
+  }
+  if size <= SIZE_2 {
+    return Ok(Dec2 {
+      dec         : Decoder::<Sym2>::new(),
+      symbol_size : size,
+      hash_type   : Hash::SIP,
+      hash_key    : key,
+    }.into_py(py));
+  }
   if size <= SIZE_MAX {
     return Ok(DecMax {
       dec         : Decoder::<SymMax>::new(),
@@ -277,6 +312,8 @@ fn new_decoder_sip(py: Python, size: usize, key: [u8; KEY_SIZE]) -> PyResult<PyO
 #[pymodule]
 fn riblt_rust_py(_py: Python, m: &PyModule) -> PyResult<()> {
   add_types!(m, Sym0,   Hashed0,   Coded0,   Enc0,   Dec0  );
+  add_types!(m, Sym1,   Hashed1,   Coded1,   Enc1,   Dec1  );
+  add_types!(m, Sym2,   Hashed2,   Coded2,   Enc2,   Dec2  );
   add_types!(m, SymMax, HashedMax, CodedMax, EncMax, DecMax);
   m.add_function(wrap_pyfunction!(new_encoder_sip, m)?)?;
   m.add_function(wrap_pyfunction!(new_decoder_sip, m)?)?;

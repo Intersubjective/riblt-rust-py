@@ -1,6 +1,9 @@
 # riblt-rust-py
 Python bindings for the [Rateless IBLT Rust library](https://github.com/Intersubjective/riblt-rust).
 
+Maximum supported symbol size is 16384 bytes.
+Optimal symbol sizes are: 64, 1024, 4096, 16384.
+
 ### How to build
 ```sh
 python3 -m venv .env

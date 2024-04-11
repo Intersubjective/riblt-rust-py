@@ -1,15 +1,32 @@
+[tool.poetry]
+name = "riblt-rust-py"
+version = "0.1.0"
+description = "Bindings for the Rateless IBLT Rust library"
+authors = ["Mitya Selivanov <automainint@guattari.tech>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.dev-dependencies]
+maturin = "^1.5"
+
 [build-system]
 requires = ["maturin>=1.5,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "riblt_rust_py"
-requires-python = ">=3.8"
+name = "riblt-rust-py"
+version = "0.1.0"
+description = "Bindings for the Rateless IBLT Rust library."
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dynamic = ["version"]
+
 [tool.maturin]
 features = ["pyo3/extension-module"]
+module-name = "riblt_rust_py"
