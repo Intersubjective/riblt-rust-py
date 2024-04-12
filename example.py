@@ -19,7 +19,7 @@ def example():
   while True:
     s = enc.produce_next_coded_symbol()
     print("coded: " + str(s.data[0]) + ", " + str(s.hash) + ", " + str(s.count))
-    dec.add_coded_symbol(s)
+    dec.add_coded_symbol(bytes([s.data[0]]), s.hash, s.count)
     dec.try_decode()
     if dec.decoded():
       break

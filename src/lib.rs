@@ -145,7 +145,7 @@ macro_rules! instant {
 
       fn add_symbol(&mut self, bytes: &[u8]) -> PyResult<()> {
         if bytes.len() > $max_size || bytes.len() != self.symbol_size {
-          return Err(PyTypeError::new_err("invalid byte array size"))
+          return Err(PyTypeError::new_err("invalid byte array size"));
         }
         self.dec.add_symbol(&$Sym {
           bytes     : core::array::from_fn(|i| if i < self.symbol_size { bytes[i] } else { 0 }),
@@ -156,16 +156,19 @@ macro_rules! instant {
         Ok(())
       }
 
-      fn add_coded_symbol(&mut self, sym: &$Coded) -> PyResult<()> {
+      fn add_coded_symbol(&mut self, data: &[u8], hash: u64, count: i64) -> PyResult<()> {
+        if data.len() != $max_size && data.len() != self.symbol_size {
+          return Err(PyTypeError::new_err("invalid data size"));
+        }
         self.dec.add_coded_symbol(&CodedSymbol::<$Sym> {
           symbol : $Sym {
-            bytes     : sym.data,
+            bytes     : core::array::from_fn(|i| if i < self.symbol_size { data[i] } else { 0 }),
             size      : self.symbol_size,
             hash_type : self.hash_type,
             hash_key  : self.hash_key,
           },
-          hash  : sym.hash,
-          count : sym.count,
+          hash  : hash,
+          count : count,
         });
         Ok(())
       }
